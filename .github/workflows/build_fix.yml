@@ -1,0 +1,87 @@
+name: Build Helium Fix
+
+# 触发条件：当你 push 代码到 main 分支时自动运行
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+env:
+  THEOS: ''
+  # 强制使用 Xcode 15.4 (兼容 Swift 5.8/5.10)
+  XCODE_VERSION: '15.4'
+
+jobs:
+  build:
+    # 关键修改：必须使用 macos-14 (Sonoma)，它原生包含 Xcode 15.4
+    # macos-latest 现在指向 macOS 15，默认只有 Xcode 16，会导致报错
+    runs-on: macos-14
+
+    steps:
+      - name: Setup Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Install Homebrew dependencies
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install dpkg ldid make libplist openssl@3
+          # 兼容处理：自动查找 make 路径
+          if [ -d "/opt/homebrew/opt/make/libexec/gnubin" ]; then
+            echo "/opt/homebrew/opt/make/libexec/gnubin" >> $GITHUB_PATH
+          else
+            echo "/usr/local/opt/make/libexec/gnubin" >> $GITHUB_PATH
+          fi
+
+      - name: Checkout XXTouchNG/theos
+        uses: actions/checkout@v4
+        with:
+          repository: XXTouchNG/theos
+          ref: 78ee784d8d3238982c9abdc58cd39919263648b1
+          path: theos
+          submodules: recursive
+
+      - name: Add THEOS environment variables
+        run: |
+          rm -rf $GITHUB_WORKSPACE/theos/sdks
+          echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
+
+      - name: Checkout theos/sdks
+        uses: actions/checkout@v4
+        with:
+          repository: theos/sdks
+          ref: master
+          path: ${{ env.THEOS }}/sdks
+
+      # 新增步骤：修复 SDK 兼容性问题
+      # 如果 Xcode 版本过高，这步会删除旧的二进制模块，强制重新编译接口
+      - name: Patch SDK for Compatibility
+        run: |
+          SDK_PATH="$GITHUB_WORKSPACE/theos/sdks/iPhoneOS16.5.sdk"
+          if [ -d "$SDK_PATH" ]; then
+            echo "Patching iPhoneOS16.5.sdk..."
+            # 删除 SwiftUI 的二进制模块缓存，解决 "SDK is not supported by the compiler"
+            find "$SDK_PATH/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule" -name "*.swiftmodule" -delete
+            echo "Removed binary swiftmodules to force interface recompilation."
+          else
+            echo "SDK 16.5 not found, skipping patch."
+          fi
+
+      - name: Checkout Your Code
+        uses: actions/checkout@v4
+        with:
+          path: Helium
+          submodules: recursive
+  
+      - name: Make IPA
+        run: |
+          cd $GITHUB_WORKSPACE/Helium
+          chmod +x ./ipabuild.sh
+          # 使用 Release 模式编译
+          ./ipabuild.sh 
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Helium-Fixed.tipa
+          path: ${{ github.workspace }}/Helium/build/Helium.tipa
