@@ -21,7 +21,7 @@ struct SettingsView: View {
     
     // Preference Variables
     @State var apiKey: String = ""
-    @State var dateLocale: String = "en_US"
+    @State var dateLocale: String = Locale.current.languageCode!
     @State var hideSaveConfirmation: Bool = false
     @State var debugBorder: Bool = false
     
@@ -38,24 +38,17 @@ struct SettingsView: View {
                 // Preferences List
                 Section {
                     HStack {
-                        Text(NSLocalizedString("Date Locale", comment:""))
+                        Text(NSLocalizedString("Locale", comment:""))
                             .bold()
-                        Spacer()
-                        Picker("", selection: $dateLocale) {
-                            Text("en_US").tag("en_US")
-                            Text("zh_CN").tag("zh_CN")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        DropdownPicker(selection: $dateLocale) {
+                            return [
+                                DropdownItem("en", tag: "en"),
+                                DropdownItem("zh", tag: "zh")
+                            ]
                         }
-                        .pickerStyle(.menu)
                     }
 
-                    HStack {
-                        Text(NSLocalizedString("Weather Api key", comment:""))
-                            .bold()
-                        Spacer()
-                        TextField("", text: $apiKey)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
-                    
                     HStack {
                         Toggle(isOn: $hideSaveConfirmation) {
                             Text(NSLocalizedString("Hide Save Confirmation Popup", comment:""))
@@ -75,7 +68,7 @@ struct SettingsView: View {
                     HStack {
                         Text(NSLocalizedString("Helium Data", comment:""))
                             .bold()
-                        Spacer()
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         Button(action: {
                             do {
                                 try UserDefaults.standard.deleteUserDefaults(forPath: USER_DEFAULTS_PATH)
@@ -90,33 +83,6 @@ struct SettingsView: View {
                     }
                 } header: {
                     Label(NSLocalizedString("Preferences", comment:""), systemImage: "gear")
-                }
-                
-                // Debug Settings
-                if #available(iOS 15, *), DEBUG_MODE_ENABLED {
-                    Section {
-                        HStack {
-                            Text(NSLocalizedString("Side Widget Size", comment:""))
-                                .bold()
-                            Spacer()
-                            TextField(NSLocalizedString("Side Size", comment:""), value: $sideWidgetSize, format: .number)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .keyboardType(.decimalPad)
-                                .submitLabel(.done)
-                        }
-                        
-                        HStack {
-                            Text(NSLocalizedString("Center Widget Size", comment:""))
-                                .bold()
-                            Spacer()
-                            TextField(NSLocalizedString("Center Size", comment:""), value: $centerWidgetSize, format: .number)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .keyboardType(.decimalPad)
-                                .submitLabel(.done)
-                        }
-                    } header: {
-                        Label(NSLocalizedString("Debug Preferences", comment:""), systemImage: "ladybug")
-                    }
                 }
                 
                 // Credits List
@@ -147,14 +113,12 @@ struct SettingsView: View {
     }
 
     func loadSettings() {
-        dateLocale = UserDefaults.standard.string(forKey: "dateLocale", forPath: USER_DEFAULTS_PATH) ?? "en_US"
-        apiKey = UserDefaults.standard.string(forKey: "apiKey", forPath: USER_DEFAULTS_PATH) ?? ""
+        dateLocale = UserDefaults.standard.string(forKey: "dateLocale", forPath: USER_DEFAULTS_PATH) ?? Locale.current.languageCode!
         hideSaveConfirmation = UserDefaults.standard.bool(forKey: "hideSaveConfirmation", forPath: USER_DEFAULTS_PATH)
         debugBorder = UserDefaults.standard.bool(forKey: "debugBorder", forPath: USER_DEFAULTS_PATH)
     }
 
     func saveChanges() {
-        UserDefaults.standard.setValue(apiKey, forKey: "apiKey", forPath: USER_DEFAULTS_PATH)
         UserDefaults.standard.setValue(dateLocale, forKey: "dateLocale", forPath: USER_DEFAULTS_PATH)
         UserDefaults.standard.setValue(hideSaveConfirmation, forKey: "hideSaveConfirmation", forPath: USER_DEFAULTS_PATH)
         UserDefaults.standard.setValue(debugBorder, forKey: "debugBorder", forPath: USER_DEFAULTS_PATH)

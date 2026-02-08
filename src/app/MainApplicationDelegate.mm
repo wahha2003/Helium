@@ -1,7 +1,9 @@
 #import "MainApplicationDelegate.h"
 #import "MainApplication.h"
 #import "Helium-Swift.h"
+
 #import "../extensions/FontUtils.h"
+#import "../extensions/HWeatherController.h"
 
 @implementation MainApplicationDelegate
 
@@ -20,6 +22,8 @@
     // load fonts from documents
     [FontUtils loadFontsFromFolder:[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject]];
     [FontUtils loadAllFonts];
+
+    [HWeatherController sharedInstance];
 
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window setRootViewController:[[[ContentInterface alloc] init] createUI]];

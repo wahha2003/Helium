@@ -14,9 +14,13 @@
 #import <objc/runtime.h>
 #import "WidgetManager.h"
 #import <IOKit/IOKitLib.h>
+#import <AVFoundation/AVAudioSession.h>
 #import "../extensions/LunarDate.h"
 #import "../extensions/FontUtils.h"
 #import "../extensions/WeatherUtils.h"
+#import "../extensions/HWeatherController.h"
+#import "../extensions/HFPSStatus.h"
+#import "../extensions/MediaRemoteManager.h"
 
 // Thanks to: https://github.com/lwlsw/NetworkSpeed13
 
@@ -54,7 +58,7 @@ static NSAttributedString *attributedUploadPrefix2 = nil;
 static NSAttributedString *attributedDownloadPrefix2 = nil;
 
 #pragma mark - Date Widget
-static NSString* formattedDate(NSString *dateFormat, NSString *dateLocale)
+static NSString* formattedDate(NSString *dateFormat, NSString* dateLocale)
 {
     if (!formatter) {
         formatter = [[NSDateFormatter alloc] init];
@@ -282,6 +286,65 @@ static NSString* formattedChargingSymbol(BOOL filled)
 }
 
 
+static NSMutableAttributedString* replaceWeatherImage(NSString* formattedText, NSAttributedString *replacement) {
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\{([^}]+)\\}" options:NSRegularExpressionAnchorsMatchLines error:nil];
+    NSArray *matches = [regex matchesInString:formattedText options:kNilOptions range:NSMakeRange(0, formattedText.length)];
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:formattedText];
+    for (NSTextCheckingResult *result in [matches reverseObjectEnumerator])
+    {
+        NSString *match = [formattedText substringWithRange:result.range];
+        if ([match isEqual:@"{i}"]) {
+            [attributedString replaceCharactersInRange:result.range withAttributedString:replacement];
+        }
+    }
+    return attributedString;
+}
+
+static BOOL hasBluetoothHeadset() {
+    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+    AVAudioSessionRouteDescription *currentRoute = [audioSession currentRoute];
+    for (AVAudioSessionPortDescription *output in currentRoute.outputs) {
+        if ([[output portType] isEqualToString:@"BluetoothA2DPOutput"]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+static NSString* getLyricsKeyByBundleIdentifier(NSString *bundleid) {
+    if([bundleid isEqual:@"com.soda.music"]
+        || [bundleid isEqual:@"com.tencent.QQMusic"] 
+        || [bundleid isEqual:@"com.yeelion.kwplayer"]
+        || [bundleid isEqual:@"com.migu.migumobilemusic"]
+        || [bundleid isEqual:@"com.wenyu.bodian"]
+    ) {
+        if (!hasBluetoothHeadset()) {
+            return @"kMRMediaRemoteNowPlayingInfoArtist";
+        } else {
+            return @"kMRMediaRemoteNowPlayingInfoTitle";
+        }
+    } else if([bundleid isEqual:@"com.netease.cloudmusic"]
+        || [bundleid isEqual:@"com.kugou.kugou1002"]
+        || [bundleid isEqual:@"com.kugou.kgyouth"]
+    ) {
+        return @"kMRMediaRemoteNowPlayingInfoTitle";
+    } else {
+        return nil;
+    }
+}
+
+static NSString* getLyricsKeyByType(int type) {
+    if(type == 1) {
+        return @"kMRMediaRemoteNowPlayingInfoTitle";
+    } else if(type == 2) {
+        return @"kMRMediaRemoteNowPlayingInfoArtist";
+    } else if(type == 3) {
+        return @"kMRMediaRemoteNowPlayingInfoAlbum";
+    } else {
+        return nil;
+    }
+}
+
 #pragma mark - Main Widget Functions
 /*
  Widget Identifiers:
@@ -295,11 +358,13 @@ static NSString* formattedChargingSymbol(BOOL filled)
  7 = Battery Percentage
  8 = Charging Symbol
  9 = Weather
+ 10 = Lyrics
+ 11 = FPS
 
  TODO:
  - Music Visualizer
  */
-void formatParsedInfo(NSDictionary *parsedInfo, NSInteger parsedID, NSMutableAttributedString *mutableString, double fontSize, UIColor *textColor, NSString *apiKey, NSString *dateLocale)
+void formatParsedInfo(NSDictionary *parsedInfo, NSInteger parsedID, NSMutableAttributedString *mutableString, double fontSize, UIColor *textColor, UIFont *font, NSString *dateLocale)
 {
     NSString *widgetString;
     NSString *sfSymbolName;
@@ -309,7 +374,8 @@ void formatParsedInfo(NSDictionary *parsedInfo, NSInteger parsedID, NSMutableAtt
         case 5:
             // Date/Time
             widgetString = formattedDate(
-                [parsedInfo valueForKey:@"dateFormat"] ? [parsedInfo valueForKey:@"dateFormat"] : (parsedID == 1 ? NSLocalizedString(@"E MMM dd", comment: @"") : @"hh:mm"), dateLocale
+                [parsedInfo valueForKey:@"dateFormat"] ? [parsedInfo valueForKey:@"dateFormat"] : (parsedID == 1 ? NSLocalizedString(@"E MMM dd", comment: @"") : @"hh:mm"),
+                dateLocale
             );
             break;
         case 2:
@@ -366,12 +432,79 @@ void formatParsedInfo(NSDictionary *parsedInfo, NSInteger parsedID, NSMutableAtt
         case 9:
             {
                 // Weather
-                NSString *location = [parsedInfo valueForKey:@"location"];
-                NSString *format = [parsedInfo valueForKey:@"format"];
-                NSDictionary *now = [WeatherUtils fetchNowWeatherForLocation: location apiKey:apiKey dateLocale:dateLocale];
-                NSDictionary *today = [WeatherUtils fetchTodayWeatherForLocation: location apiKey:apiKey dateLocale:dateLocale];
-                widgetString = [WeatherUtils formatNowResult:now format:format];
-                widgetString = [WeatherUtils formatTodayResult:today format:widgetString];
+                NSString *format = [parsedInfo valueForKey:@"format"] ?: @"{i}{n}{lt}°~{ht}°({t}°,{bt}°)💧{h}%";
+                HWeatherController *weatherController = [HWeatherController sharedInstance];
+                weatherController.locale = [[NSLocale alloc] initWithLocaleIdentifier:dateLocale];
+                [weatherController updateModel];
+                weatherController.useFahrenheit = [parsedInfo valueForKey:@"useFahrenheit"] ? [[parsedInfo valueForKey:@"useFahrenheit"] boolValue] : NO;
+                weatherController.useMetric = [parsedInfo valueForKey:@"useMetric"] ? [[parsedInfo valueForKey:@"useMetric"] boolValue] : NO;
+                NSDictionary *weatherData = [weatherController weatherData];
+                format = [WeatherUtils formatWeatherData:weatherData format:format];
+                // NSLog(@"boom format:%@", format);
+
+                UIImage *weatherImage = weatherData[@"conditions_image"];
+                if (weatherImage) {
+                    imageAttachment = [[NSTextAttachment alloc] init];
+                    CGFloat imgH = font.pointSize * 1.4f;
+                    CGFloat imgW = (weatherImage.size.width / weatherImage.size.height) * imgH;
+                    [imageAttachment setBounds:CGRectMake(0, roundf(font.capHeight - imgH)/2.f, imgW, imgH)];
+                    weatherImage = [weatherImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                    imageAttachment.image = weatherImage;
+                    format = [format stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"];
+                    format = [format stringByReplacingOccurrencesOfString:@"\\t" withString:@"\t"];
+                    [mutableString appendAttributedString:replaceWeatherImage(format, [NSAttributedString attributedStringWithAttachment:imageAttachment])];
+                } else {
+                    widgetString = format;
+                }
+            }
+            break;
+        case 10:
+            {
+                // Lyrics
+                int lyricsType = [parsedInfo valueForKey:@"lyricsType"] ? [[parsedInfo valueForKey:@"lyricsType"] integerValue] : 0;
+                int bluetoothType = [parsedInfo valueForKey:@"bluetoothType"] ? [[parsedInfo valueForKey:@"bluetoothType"] integerValue] : 0;
+                bool unsupported = [parsedInfo valueForKey:@"unsupported"] ? [[parsedInfo valueForKey:@"unsupported"] boolValue] : NO;
+
+                __block NSString *resultMessage1 = nil;
+                __block BOOL resultMessage2 = false;
+                __block NSString *resultMessage3 = nil;
+                MediaRemoteManager *manager = [MediaRemoteManager sharedManager];
+                dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+                if (!unsupported) {
+                    [manager getBundleIdentifierWithCompletion:^(NSString *bundleIdentifier) {
+                        resultMessage1 = getLyricsKeyByBundleIdentifier(bundleIdentifier);
+                        dispatch_semaphore_signal(semaphore);
+                    }];
+                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+                }
+                if (unsupported || resultMessage1) {
+                    [manager getNowPlayingApplicationIsPlayingWithCompletion:^(BOOL isPlaying) {
+                        resultMessage2 = isPlaying;
+                        dispatch_semaphore_signal(semaphore);
+                    }];
+                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+                    if (resultMessage2) {
+                        [manager getNowPlayingInfoWithCompletion:^(NSDictionary *info) {
+                            if (lyricsType == 0 && resultMessage1) {
+                                resultMessage3 = info[resultMessage1];
+                            } else {
+                                if (hasBluetoothHeadset()) {
+                                    resultMessage3 = info[getLyricsKeyByType(bluetoothType)];
+                                } else {
+                                    resultMessage3 = info[getLyricsKeyByType(lyricsType)];
+                                }
+                            }
+                            dispatch_semaphore_signal(semaphore);
+                        }];
+                        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+                        widgetString = resultMessage3;
+                    }
+                }
+            }
+            break;
+        case 11:
+            {
+                widgetString = [NSString stringWithFormat: @"%.0f FPS", [HFPSStatus sharedInstance].fpsValue];
             }
             break;
         default:
@@ -381,22 +514,23 @@ void formatParsedInfo(NSDictionary *parsedInfo, NSInteger parsedID, NSMutableAtt
     if (widgetString) {
         widgetString = [widgetString stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"];
         widgetString = [widgetString stringByReplacingOccurrencesOfString:@"\\t" withString:@"\t"];
-        [
-            mutableString appendAttributedString:[[NSAttributedString alloc] initWithString: widgetString]
-        ];
+        [mutableString appendAttributedString:[[NSAttributedString alloc] initWithString: widgetString]];
     }
 }
 
-NSAttributedString* formattedAttributedString(NSArray *identifiers, double fontSize, UIColor *textColor, NSString *apiKey, NSString *dateLocale)
+NSAttributedString* formattedAttributedString(NSArray *identifiers, double fontSize, UIColor *textColor, UIFont *font, NSString *dateLocale)
 {
     @autoreleasepool {
         NSMutableAttributedString* mutableString = [[NSMutableAttributedString alloc] init];
-        
+        dispatch_queue_t concurrentQueue = dispatch_queue_create("formatqueue", DISPATCH_QUEUE_CONCURRENT);
+
         if (identifiers) {
             for (id idInfo in identifiers) {
-                NSDictionary *parsedInfo = idInfo;
-                NSInteger parsedID = [parsedInfo valueForKey:@"widgetID"] ? [[parsedInfo valueForKey:@"widgetID"] integerValue] : 0;
-                formatParsedInfo(parsedInfo, parsedID, mutableString, fontSize, textColor, apiKey, dateLocale);
+                dispatch_sync(concurrentQueue, ^{
+                    NSDictionary *parsedInfo = idInfo;
+                    NSInteger parsedID = [parsedInfo valueForKey:@"widgetID"] ? [[parsedInfo valueForKey:@"widgetID"] integerValue] : 0;
+                    formatParsedInfo(parsedInfo, parsedID, mutableString, fontSize, textColor, font, dateLocale);
+                });
             }
         } else {
             return nil;

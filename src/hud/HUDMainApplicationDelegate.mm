@@ -4,6 +4,9 @@
 #import "HUDMainWindow.h"
 #import "HUDRootViewController.h"
 
+#import "../extensions/FontUtils.h"
+#import "../extensions/HWeatherController.h"
+
 #import "../helpers/private_headers/SBSAccessibilityWindowHostingController.h"
 #import "../helpers/private_headers/UIWindow+Private.h"
 
@@ -19,6 +22,21 @@
 #if DEBUG
         os_log_debug(OS_LOG_DEFAULT, "- [HUDMainApplicationDelegate init]");
 #endif
+
+        // load fonts from app
+        [FontUtils loadFontsFromFolder:[NSString stringWithFormat:@"%@%@", [[NSBundle mainBundle] resourcePath],  @"/fonts"]];
+        // load fonts from documents
+        [FontUtils loadFontsFromFolder:[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject]];
+
+        // set language
+        // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"AppleLanguages"];
+        // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"AppleLocale"];
+        [[NSUserDefaults standardUserDefaults] setObject:[NSArray arrayWithObjects: [self dateLocale], nil] forKey:@"AppleLanguages"];
+        // [[NSUserDefaults standardUserDefaults] setObject:[self dateLocale] forKey:@"AppleLocale"];
+
+        [[NSUserDefaults standardUserDefaults] synchronize];
+
+        [HWeatherController sharedInstance];
     }
     return self;
 }
@@ -55,6 +73,13 @@
 #pragma clang diagnostic pop
 
     return YES;
+}
+
+- (NSString*) dateLocale
+{
+    NSDictionary *_userDefaults = [[NSDictionary dictionaryWithContentsOfFile:USER_DEFAULTS_PATH] mutableCopy] ?: [NSMutableDictionary dictionary];
+    NSString *locale = [_userDefaults objectForKey: @"dateLocale"];
+    return locale ? locale : @"en";
 }
 
 @end

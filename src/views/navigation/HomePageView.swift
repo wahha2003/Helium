@@ -75,6 +75,9 @@ struct HomePageView: View {
         #if !targetEnvironment(simulator)
           isNowEnabled = IsHUDEnabledBridger()
         #endif
+        if UserDefaults.standard.string(forKey: "dateLocale", forPath: USER_DEFAULTS_PATH) == nil {
+            UserDefaults.standard.setValue(Locale.current.languageCode!, forKey: "dateLocale", forPath: USER_DEFAULTS_PATH)
+        }
       }
       .onOpenURL(perform: { url in
         let _ = FileManager.default

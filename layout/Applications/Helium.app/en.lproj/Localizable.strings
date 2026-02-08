@@ -24,8 +24,7 @@
 "Version " = "Version ";
 "UNKNOWN" = "UNKNOWN";
 "Release" = "Release";
-"Date Locale" = "Date Locale";
-"Weather Api key" = "QWeather Api key";
+"Locale" = "Locale";
 "Hide Save Confirmation Popup" = "Hide Save Confirmation Popup";
 "Display Debug Border" = "Display Debug Border";
 "Use Adaptive Colors" = "Use Adaptive Colors";
@@ -83,19 +82,23 @@
 "Time Format" = "Time Format";
 "Label Text" = "Label Text";
 "Example" = "Example";
-"Location" = "LocationID or Latitude,Longitude";
 "Input" = "Input";
-"Get" = "Get";
-"Input Location Name" = "Input Location Name";
-"Get Location ID" = "Get Location ID";
+"Measurement System" = "Measurement System";
+"Metric" = "Metric";
+"US" = "US";
 "Show Percent (%) Symbol" = "Show Percent (%) Symbol";
 "Fill Symbol" = "Fill Symbol";
 "No Configurable Aspects" = "No Configurable Aspects";
 "Save Changes" = "Save Changes";
 "Would you like to save changes to the widget?" = "Would you like to save changes to the widget?";
-"Weather Format Now" = "Now Weather Format Explanation:\n{i} Weather Icon\t\t\t{n} Weather Text\n{t} Current Temperature\t{h} Humidity\n{w} Wind Direction\t\t{wp} Wind Power\n{bt} Body Temperature\t{pc} Precipitation\n{ps} Pressure\t\t\t\t{v} Visibility\n{c} Cloud Cover";
-"Weather Format Today" = "Today Weather Format Explanation:\n{di} Daytime Weather Icon\n{dn} Daytime Weather Text\n{dt} Daytime Temperature\n{dw} Daytime Wind Direction\n{dwp} Daytime Wind Power\n{ni} Nighttime Weather Icon\n{nn} Nighttime Weather Text\n{nt} Nighttime Temperature\n{nw} Nighttime Wind Direction\n{nwp} Nighttime Wind Power\n{tpc} Today Precipitation\n{tuv} Today UV Index\n{th} Today Humidity\n{tps} Today Pressure\n{tv} Today Visibility\n{tc} Today Cloud Cover";
+"Weather Format" = "This weather format explanation includes:\nWeather Icon: {i}\nWeather Description: {n}\nCurrent Temperature: {t} {ts}\nCurrent Humidity: {h} {hs}\nFeels Like Temperature: {bt} {bts}\nLowest Temperature: {lt} {lts}\nHighest Temperature: {ht} {hts}\nWind Speed: {ws} {wsu}\nWind Direction: {wd} {wds}\nVisibility: {v} {vu}\nPrecipitation: {pp} {ppu}\nPressure: {ps} {psu}\nUV Index: {uvi}\nAir Quality Index: {aqi}\nLocation: {l}\nThose ending with 's' include symbols, those ending with 'u' include units.";
 "Format" = "Format";
+"Auto Detection" = "Default";
+"Artist" = "Artist";
+"Album" = "Album";
+"Lyrics Option" = "Lyrics Display Option";
+"Bluetooth Headset Option" = "Bluetooth Headset Option";
+"Unsupported Apps Are Displayed" = "Unsupported Apps Are Displayed";
 
 /* WidgetPreviewsView.swift */
 "ERROR" = "ERROR";
@@ -173,6 +176,7 @@
 "Battery Capacity" = "Battery Capacity";
 "Charging Symbol" = "Charging Symbol";
 "Weather" = "Weather";
+"Lyrics" = "Lyrics";
 
 /* WeatherUtils.mm */
 "error" = "error";

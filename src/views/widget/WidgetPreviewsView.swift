@@ -58,7 +58,7 @@ struct WidgetPreviewsView: View {
             let dateFormatter = DateFormatter()
             let newDateFormat = LunarDate.getChineseCalendar(with: Date(), format: dateFormat)
             dateFormatter.dateFormat = newDateFormat
-            let locale = UserDefaults.standard.string(forKey: "dateLocale", forPath: USER_DEFAULTS_PATH) ?? "en_US"
+            let locale = UserDefaults.standard.string(forKey: "dateLocale", forPath: USER_DEFAULTS_PATH) ?? "en"
             dateFormatter.locale = Locale(identifier: locale)
             text = dateFormatter.string(from: Date())
             // SAFEGUARD
@@ -87,14 +87,16 @@ struct WidgetPreviewsView: View {
             }
         case .textWidget:
             text = widget.config["text"] as? String ?? NSLocalizedString("Unknown", comment:"")
-            break;
         case .weather:
             text = NSLocalizedString("Weather Preview", comment:"")
-            break;
         case .currentCapacity:
             text = "50\(widget.config["showPercentage"] as? Bool ?? true ? "%" : "")"
         case .chargeSymbol:
             image = widget.config["filled"] as? Bool ?? true ? Image(systemName: "bolt.fill") : Image(systemName: "bolt")
+        case .lyrics:
+            text = NSLocalizedString("Lyrics", comment:"")
+        case .fps:
+            text = NSLocalizedString("FPS", comment:"")
         }
         widget.modified = false
     }

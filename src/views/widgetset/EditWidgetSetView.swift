@@ -62,7 +62,7 @@ struct EditWidgetSetView: View {
                     HStack {
                         Text(NSLocalizedString("Widget Set Title", comment: ""))
                             .bold()
-                        Spacer()
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         TextField(NSLocalizedString("Title", comment: ""), text: $nameInput)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .onChange(of: nameInput) { _ in
@@ -83,17 +83,19 @@ struct EditWidgetSetView: View {
 
                     // MARK: Update Interval
                     HStack {
-                        Text(NSLocalizedString("Orientation Mode", comment: "")).foregroundColor(.primary).bold()
-                        Spacer()
-                        Picker(selection: $orientationMode) {
-                            Text(NSLocalizedString("Portrait & Landscape", comment: "")).tag(0)
-                            Text(NSLocalizedString("Portrait", comment: "")).tag(1)
-                            Text(NSLocalizedString("Landscape", comment: "")).tag(2)
-                        } label: {}
-                            .pickerStyle(.menu)
-                            .onChange(of: orientationMode) { _ in
-                                changesMade = true
-                            }
+                        Text(NSLocalizedString("Orientation Mode", comment: ""))
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        DropdownPicker(selection: $orientationMode) {
+                            return [
+                                DropdownItem(NSLocalizedString("Portrait & Landscape", comment:""), tag: 0),
+                                DropdownItem(NSLocalizedString("Portrait", comment:""), tag: 1),
+                                DropdownItem(NSLocalizedString("Landscape", comment:""), tag: 2)
+                            ]
+                        }
+                        .onChange(of: orientationMode) { _ in
+                            changesMade = true
+                        }
                     }
 
                     // MARK: Update Interval
@@ -115,30 +117,34 @@ struct EditWidgetSetView: View {
                 Section {
                     // MARK: Anchor Sides
                     HStack {
-                        Text(NSLocalizedString("Horizontal Anchor Side", comment: "")).foregroundColor(.primary).bold()
-                        Spacer()
-                        Picker(selection: $anchorSelection) {
-                            Text(NSLocalizedString("Left", comment: "")).tag(0)
-                            Text(NSLocalizedString("Center", comment: "")).tag(1)
-                            Text(NSLocalizedString("Right", comment: "")).tag(2)
-                        } label: {}
-                            .pickerStyle(.menu)
-                            .onChange(of: anchorSelection) { _ in
-                                changesMade = true
-                            }
+                        Text(NSLocalizedString("Horizontal Anchor Side", comment: ""))
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        DropdownPicker(selection: $anchorSelection) {
+                            return [
+                                DropdownItem(NSLocalizedString("Left", comment:""), tag: 0),
+                                DropdownItem(NSLocalizedString("Center", comment:""), tag: 1),
+                                DropdownItem(NSLocalizedString("Right", comment:""), tag: 2)
+                            ]
+                        }
+                        .onChange(of: anchorSelection) { _ in
+                            changesMade = true
+                        }
                     }
                     HStack {
-                        Text(NSLocalizedString("Vertical Anchor Side", comment: "")).foregroundColor(.primary).bold()
-                        Spacer()
-                        Picker(selection: $anchorYSelection) {
-                            Text(NSLocalizedString("Top", comment: "")).tag(0)
-                            Text(NSLocalizedString("Center", comment: "")).tag(1)
-                            Text(NSLocalizedString("Bottom", comment: "")).tag(2)
-                        } label: {}
-                            .pickerStyle(.menu)
-                            .onChange(of: anchorYSelection) { _ in
-                                changesMade = true
-                            }
+                        Text(NSLocalizedString("Vertical Anchor Side", comment: ""))
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        DropdownPicker(selection: $anchorYSelection) {
+                            return [
+                                DropdownItem(NSLocalizedString("Top", comment:""), tag: 0),
+                                DropdownItem(NSLocalizedString("Center", comment:""), tag: 1),
+                                DropdownItem(NSLocalizedString("Bottom", comment:""), tag: 2)
+                            ]
+                        }
+                        .onChange(of: anchorYSelection) { _ in
+                            changesMade = true
+                        }
                     }
                     if orientationMode != 2 {
                         // MARK: Portrait Offset X
@@ -265,7 +271,7 @@ struct EditWidgetSetView: View {
                             HStack {
                                 Text(NSLocalizedString("Text Color", comment: ""))
                                     .bold()
-                                Spacer()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 ColorPicker(NSLocalizedString("Set Text Color", comment: ""), selection: $customColor)
                                     .labelsHidden()
                                     .onChange(of: customColor) { _ in
@@ -294,16 +300,18 @@ struct EditWidgetSetView: View {
                         if hasBlur {
                             // MARK: Blur Style
                             HStack {
-                                Text(NSLocalizedString("Blur Style", comment: "")).foregroundColor(.primary).bold()
-                                Spacer()
-                                Picker(selection: $blurStyle) {
-                                    Text(NSLocalizedString("Light", comment: "")).tag(0)
-                                    Text(NSLocalizedString("Dark", comment: "")).tag(1)
-                                } label: {}
-                                    .pickerStyle(.menu)
-                                    .onChange(of: blurStyle) { _ in
-                                        changesMade = true
-                                    }
+                                Text(NSLocalizedString("Blur Style", comment: ""))
+                                    .bold()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                DropdownPicker(selection: $blurStyle) {
+                                    return [
+                                        DropdownItem(NSLocalizedString("Light", comment:""), tag: 0),
+                                        DropdownItem(NSLocalizedString("Dark", comment:""), tag: 1)
+                                    ]
+                                }
+                                .onChange(of: blurStyle) { _ in
+                                    changesMade = true
+                                }
                             }
                             // MARK: Blur Corner Radius
                             VStack {
@@ -339,12 +347,14 @@ struct EditWidgetSetView: View {
                     // MARK: Text Font
                     VStack {
                         HStack {
-                            Text(NSLocalizedString("Text Font", comment: "")).foregroundColor(.primary).bold()
-                            Spacer()
-                            Text(NSLocalizedString("Font Preview", comment: "")).foregroundColor(.primary)
-                            .font((fontName == "System Font" ? Font.system(size: UIFont.labelFontSize) 
-                                : Font.custom(fontName, size: UIFont.labelFontSize)
-                            ).weight((textBold ? Font.Weight.bold : Font.Weight.light)))
+                            Text(NSLocalizedString("Text Font", comment: ""))
+                                .bold()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Text(NSLocalizedString("Font Preview", comment: ""))
+                                .font((fontName == "System Font" ? Font.system(size: UIFont.labelFontSize) 
+                                    : Font.custom(fontName, size: UIFont.labelFontSize)
+                                )
+                                .weight((textBold ? Font.Weight.bold : Font.Weight.light)))
                         }
                         Picker(selection: $fontName) {
                             ForEach(fonts, id: \.self) { _fontName in
@@ -380,14 +390,16 @@ struct EditWidgetSetView: View {
                     }
                     // MARK: Text Alignment
                     HStack {
-                        Text(NSLocalizedString("Text Alignment", comment: "")).foregroundColor(.primary).bold()
-                        Spacer()
-                        Picker(selection: $textAlignment) {
-                            Text(NSLocalizedString("Left", comment: "")).tag(0)
-                            Text(NSLocalizedString("Center", comment: "")).tag(1)
-                            Text(NSLocalizedString("Right", comment: "")).tag(2)
-                        } label: {}
-                        .pickerStyle(.menu)
+                        Text(NSLocalizedString("Text Alignment", comment: ""))
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        DropdownPicker(selection: $textAlignment) {
+                            return [
+                                DropdownItem(NSLocalizedString("Left", comment:""), tag: 0),
+                                DropdownItem(NSLocalizedString("Center", comment:""), tag: 1),
+                                DropdownItem(NSLocalizedString("Right", comment:""), tag: 2)
+                            ]
+                        }
                         .onChange(of: textAlignment) { _ in
                             changesMade = true
                         }
@@ -434,22 +446,6 @@ struct EditWidgetSetView: View {
                             HStack {
                                 WidgetPreviewsView(widget: widgetID, previewColor: .white)
                                 Spacer()
-                                // MARK: Configure Widget Button
-//                            Button(action: {
-//
-//                            }) {
-//                                Image(systemName: "gear")
-//                            }
-                                // MARK: Remove Widget ID Button
-//                            Button(action: {
-//                                // save changes
-//                                widgetManager.removeWidget(widgetSet: widgetSet, id: widgetID.wrappedValue, save: false)
-//                                saveSet()
-//                                widgetIDs = widgetSet.widgetIDs
-//                            }) {
-//                                Image(systemName: "trash")
-//                                    .foregroundColor(.red)
-//                            }
                             }
                             .onDrag { // mean drag a row container
                                 return NSItemProvider()

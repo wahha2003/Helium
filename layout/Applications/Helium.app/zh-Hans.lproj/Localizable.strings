@@ -24,8 +24,7 @@
 "Version " = "版本 ";
 "UNKNOWN" = "未知";
 "Release" = "发布";
-"Date Locale" = "日期地区";
-"Weather Api key" = "和风天气ApiKey";
+"Locale" = "地区";
 "Show when Rotating" = "旋转屏幕时显示";
 "Hide Save Confirmation Popup" = "不显示保存确认弹窗";
 "Display Debug Border" = "显示调试边框";
@@ -84,19 +83,23 @@
 "Time Format" = "时间格式";
 "Label Text" = "标签文本";
 "Example" = "示例";
-"Location" = "地区ID或者经纬度";
 "Input" = "输入";
-"Get" = "获取";
-"Input Location Name" = "输入地区名称";
-"Get Location ID" = "获取地区ID";
+"Measurement System" = "计量单位";
+"Metric" = "公制";
+"US" = "美制";
 "Show Percent (%) Symbol" = "显示电量%";
 "Fill Symbol" = "填充符号";
 "No Configurable Aspects" = "无可配置项";
 "Save Changes" = "保存更改";
 "Would you like to save changes to the widget?" = "是否保存对小部件的更改？";
-"Weather Format Now" = "实时天气格式说明:\n{i} 天气图标\t{n} 天气文字\n{t} 当前温度\t{h} 湿度\n{w} 风向\t\t{wp} 风力\n{bt} 体感温度\t{pc} 降水量\n{ps} 大气压力\t{v} 能见度\n{c} 云量";
-"Weather Format Today" = "今日天气格式说明：\n{di} 白天天气图标\t{dn} 白天天气文本\n{dt} 白天气温\t\t{dw} 白天风向\n{dwp} 白天风力\t{nwp} 夜间风力\n{ni} 夜间天气图标\t{nn} 夜间天气文本\n{nt} 夜间气温\t\t{nw} 夜间风向\n{tpc} 今日降水量\t{tuv} 今日紫外线指数\n{th} 今日湿度\t\t{tps} 今日气压\n{tv} 今日能见度\t{tc} 今日云量";
+"Weather Format" = "天气格式说明: \n天气图标: {i}\n天气文字: {n}\n当前温度: {t} {ts}\n当前湿度: {h} {hs}\n体感温度: {bt} {bts}\n最低温度: {lt} {lts}\n最高温度: {ht} {hts}\n风速: {ws} {wsu}\n风向: {wd} {wds}\n能见度: {v} {vu}\n降水量: {pp} {ppu}\n气压: {ps} {psu}\n紫外线指数: {uvi}\n空气质量指数: {aqi}\n地区: {l}\n以's'结尾的表示包含符号，以'u'结尾的表示包含单位";
 "Format" = "格式";
+"Auto Detection" = "默认选择";
+"Artist" = "艺术家";
+"Album" = "专辑";
+"Lyrics Option" = "歌词显示选项";
+"Bluetooth Headset Option" = "戴蓝牙耳机时显示选项";
+"Unsupported Apps Are Displayed" = "不支持的App是否显示";
 
 /* WidgetPreviewsView.swift */
 "ERROR" = "错误";
@@ -177,6 +180,7 @@
 "Battery Capacity" = "电池容量";
 "Charging Symbol" = "充电符号";
 "Weather" = "天气";
+"Lyrics" = "歌词";
 
 /* WeatherUtils.mm */
 "error" = "出错啦";

@@ -21,7 +21,6 @@ struct WidgetPreferencesView: View {
     @State var boolSelection: Bool = false
     
     @State var modified: Bool = false
-    @State private var isPresented = false
     
     let timeFormats: [String] = [
         "hh:mm",
@@ -52,10 +51,9 @@ struct WidgetPreferencesView: View {
                     Text(NSLocalizedString("Date Format", comment:""))
                         .foregroundColor(.primary)
                         .bold()
-                    Spacer()
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     TextField(NSLocalizedString("E MMM dd", comment:""), text: $text)
-                        .frame(maxWidth: 120)
-                        .multilineTextAlignment(.trailing)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                         .onAppear {
                             if let format = widgetID.config["dateFormat"] as? String {
                                 text = format
@@ -68,13 +66,16 @@ struct WidgetPreferencesView: View {
                 // MARK: Network Type Choice
                 VStack {
                     HStack {
-                        Text(NSLocalizedString("Network Type", comment:"")).foregroundColor(.primary).bold()
-                        Spacer()
-                        Picker(selection: $intSelection) {
-                            Text(NSLocalizedString("Download", comment:"")).tag(0)
-                            Text(NSLocalizedString("Upload", comment:"")).tag(1)
-                        } label: {}
-                        .pickerStyle(.menu)
+                        Text(NSLocalizedString("Network Type", comment:""))
+                            .foregroundColor(.primary)
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        DropdownPicker(selection: $intSelection) {
+                            return [
+                                DropdownItem(NSLocalizedString("Download", comment:""), tag: 0),
+                                DropdownItem(NSLocalizedString("Upload", comment:""), tag: 1)
+                            ]
+                        }
                         .onAppear {
                             if let netUp = widgetID.config["isUp"] as? Bool {
                                 intSelection = netUp ? 1 : 0
@@ -85,13 +86,16 @@ struct WidgetPreferencesView: View {
                     }
                     // MARK: Speed Icon Choice
                     HStack {
-                        Text(NSLocalizedString("Speed Icon", comment:"")).foregroundColor(.primary).bold()
-                        Spacer()
-                        Picker(selection: $intSelection2) {
-                            Text(intSelection == 0 ? "▼" : "▲").tag(0)
-                            Text(intSelection == 0 ? "↓" : "↑").tag(1)
-                        } label: {}
-                        .pickerStyle(.menu)
+                        Text(NSLocalizedString("Speed Icon", comment:""))
+                            .foregroundColor(.primary)
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        DropdownPicker(selection: $intSelection2) {
+                            return [
+                                DropdownItem(intSelection == 0 ? "▼" : "▲", tag: 0),
+                                DropdownItem(intSelection == 0 ? "↓" : "↑", tag: 1)
+                            ]
+                        }
                         .onAppear {
                             if let speedIcon = widgetID.config["speedIcon"] as? Int {
                                 intSelection2 = speedIcon
@@ -102,15 +106,18 @@ struct WidgetPreferencesView: View {
                     }
                     // MARK: Minimum Unit Choice
                     HStack {
-                        Text(NSLocalizedString("Minimum Unit", comment:"")).foregroundColor(.primary).bold()
-                        Spacer()
-                        Picker(selection: $intSelection3) {
-                            Text("b").tag(0)
-                            Text("Kb").tag(1)
-                            Text("Mb").tag(2)
-                            Text("Gb").tag(3)
-                        } label: {}
-                        .pickerStyle(.menu)
+                        Text(NSLocalizedString("Minimum Unit", comment:""))
+                            .foregroundColor(.primary)
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        DropdownPicker(selection: $intSelection3) {
+                            return [
+                                DropdownItem("b", tag: 0),
+                                DropdownItem("Kb", tag: 1),
+                                DropdownItem("Mb", tag: 2),
+                                DropdownItem("Gb", tag: 3)
+                            ]
+                        }
                         .onAppear {
                             if let minUnit = widgetID.config["minUnit"] as? Int {
                                 intSelection3 = minUnit
@@ -132,33 +139,39 @@ struct WidgetPreferencesView: View {
             case .temperature:
                 // MARK: Battery Temperature Value
                 HStack {
-                    Text(NSLocalizedString("Temperature Unit", comment:"")).foregroundColor(.primary).bold()
-                    Spacer()
-                    Picker(selection: $intSelection) {
-                        Text(NSLocalizedString("Celcius", comment:"")).tag(0)
-                        Text(NSLocalizedString("Fahrenheit", comment:"")).tag(1)
-                    } label: {}
-                        .pickerStyle(.menu)
-                        .onAppear {
-                            if widgetID.config["useFahrenheit"] as? Bool ?? false == true {
-                                intSelection = 1
-                            } else {
-                                intSelection = 0
-                            }
+                    Text(NSLocalizedString("Temperature Unit", comment:""))
+                        .foregroundColor(.primary)
+                        .bold()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    DropdownPicker(selection: $intSelection) {
+                        return [
+                            DropdownItem(NSLocalizedString("Celcius", comment:""), tag: 0),
+                            DropdownItem(NSLocalizedString("Fahrenheit", comment:""), tag: 1)
+                        ]
+                    }
+                    .onAppear {
+                        if widgetID.config["useFahrenheit"] as? Bool ?? false == true {
+                            intSelection = 1
+                        } else {
+                            intSelection = 0
                         }
+                    }
                 }
             case .battery:
                 // MARK: Battery Value Type
                 HStack {
-                    Text(NSLocalizedString("Battery Option", comment:"")).foregroundColor(.primary).bold()
-                    Spacer()
-                    Picker(selection: $intSelection) {
-                        Text(NSLocalizedString("Watts", comment:"")).tag(0)
-                        Text(NSLocalizedString("Charging Current", comment:"")).tag(1)
-                        Text(NSLocalizedString("Amperage", comment:"")).tag(2)
-                        Text(NSLocalizedString("Charge Cycles", comment:"")).tag(3)
-                    } label: {}
-                    .pickerStyle(.menu)
+                    Text(NSLocalizedString("Battery Option", comment:""))
+                        .foregroundColor(.primary)
+                        .bold()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    DropdownPicker(selection: $intSelection) {
+                        return [
+                            DropdownItem(NSLocalizedString("Watts", comment:""), tag: 0),
+                            DropdownItem(NSLocalizedString("Charging Current", comment:""), tag: 1),
+                            DropdownItem(NSLocalizedString("Amperage", comment:""), tag: 2),
+                            DropdownItem(NSLocalizedString("Charge Cycles", comment:""), tag: 3)
+                        ]
+                    }
                     .onAppear {
                         if let batteryType = widgetID.config["batteryValueType"] as? Int {
                             intSelection = batteryType
@@ -170,9 +183,13 @@ struct WidgetPreferencesView: View {
             case .timeWidget:
                 // MARK: Time Format Selector
                 HStack {
-                    Picker(selection: $intSelection, label: Text(NSLocalizedString("Time Format", comment:"")).foregroundColor(.primary).bold()) {
-                        ForEach(0..<timeFormats.count, id: \.self) { index in
-                            Text("\(getFormattedDate(timeFormats[index]))\n(\(timeFormats[index]))").tag(index)
+                    Text(NSLocalizedString("Time Format", comment:""))
+                        .foregroundColor(.primary)
+                        .bold()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    DropdownPicker(selection: $intSelection) {
+                        return timeFormats.indices.map { index in
+                            DropdownItem("\(getFormattedDate(timeFormats[index]))\n(\(timeFormats[index]))", tag: index)
                         }
                     }
                     .onAppear {
@@ -189,10 +206,9 @@ struct WidgetPreferencesView: View {
                     Text(NSLocalizedString("Label Text", comment:""))
                         .foregroundColor(.primary)
                         .bold()
-                    Spacer()
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     TextField(NSLocalizedString("Example", comment:""), text: $text)
-                        .frame(maxWidth: 120)
-                        .multilineTextAlignment(.trailing)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                         .onAppear {
                             if let format = widgetID.config["text"] as? String {
                                 text = format
@@ -229,59 +245,125 @@ struct WidgetPreferencesView: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack {
                         HStack {
-                            Text(NSLocalizedString("Location", comment:""))
-                                .foregroundColor(.primary)
-                                .bold()
-                            Spacer()
-                            TextField(NSLocalizedString("Input", comment:""), text: $text)
-                                .frame(maxWidth: 240)
-                                .multilineTextAlignment(.trailing)
-                                .onAppear {
-                                    if let format = widgetID.config["location"] as? String {
-                                        text = format
-                                    } else {
-                                        text = "110000"
-                                    }
-                                }
-                            Button(NSLocalizedString("Get", comment:"")) {
-                                isPresented = true
-                            }
-                            .sheet(isPresented: $isPresented) {
-                                WeatherLocationView(locationID: self.$text)
-                            }
-                        }
-
-                        HStack {
                             Text(NSLocalizedString("Format", comment:""))
                                 .foregroundColor(.primary)
                                 .bold()
-                            Spacer()
-                            TextField("{i}{n} {nt}°~{dt}° ({t}°)💧{h}%", text: $weatherFormat)
-                                .frame(maxWidth: 240)
-                                .multilineTextAlignment(.trailing)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            TextField("{i}{n}{lt}°~{ht}°({t}°,{bt}°)💧{h}%", text: $weatherFormat)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .onAppear {
                                     if let format = widgetID.config["format"] as? String {
                                         weatherFormat = format
                                     } else {
-                                        weatherFormat = "{i}{n} {nt}°~{dt}° ({t}°)💧{h}%"
+                                        weatherFormat = "{i}{n}{lt}°~{ht}°({t}°,{bt}°)💧{h}%"
                                     }
                                 }
                         }
+
                         HStack {
-                            Text(NSLocalizedString("Weather Format Now", comment:""))
-                                .multilineTextAlignment(.leading)
-                            Spacer()
+                            Text(NSLocalizedString("Temperature Unit", comment:""))
+                                .foregroundColor(.primary)
+                                .bold()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            DropdownPicker(selection: $intSelection) {
+                                return [
+                                    DropdownItem(NSLocalizedString("Celcius", comment:""), tag: 0),
+                                    DropdownItem(NSLocalizedString("Fahrenheit", comment:""), tag: 1)
+                                ]
+                            }
+                            .onAppear {
+                                if widgetID.config["useFahrenheit"] as? Bool ?? false == true {
+                                    intSelection = 1
+                                } else {
+                                    intSelection = 0
+                                }
+                            }
                         }
-                        Text("\n")
+
                         HStack {
-                            Text(NSLocalizedString("Weather Format Today", comment:""))
+                            Text(NSLocalizedString("Measurement System", comment:""))
+                                .foregroundColor(.primary)
+                                .bold()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            DropdownPicker(selection: $intSelection2) {
+                                return [
+                                    DropdownItem(NSLocalizedString("Metric", comment:""), tag: 0),
+                                    DropdownItem(NSLocalizedString("US", comment:""), tag: 1)
+                                ]
+                            }
+                            .onAppear {
+                                if let useMetric = widgetID.config["useMetric"] as? Bool {
+                                    intSelection2 = useMetric ? 1 : 0
+                                } else {
+                                    intSelection2 = 0
+                                }
+                            }
+                        }
+
+                        HStack {
+                            Text(NSLocalizedString("Weather Format", comment:""))
                                 .multilineTextAlignment(.leading)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                             Spacer()
                         }
                     }
                 }
-            // default:
-            //     Text(NSLocalizedString("No Configurable Aspects", comment:""))
+            case .lyrics:
+                // MARK: Battery Value Type
+                VStack {
+                    Toggle(isOn: $boolSelection) {
+                        Text(NSLocalizedString("Unsupported Apps Are Displayed", comment:""))
+                            .foregroundColor(.primary)
+                            .bold()
+                    }
+
+                    HStack {
+                        Text(NSLocalizedString("Lyrics Option", comment:""))
+                            .foregroundColor(.primary)
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        DropdownPicker(selection: $intSelection) {
+                            return [
+                                DropdownItem(NSLocalizedString("Auto Detection", comment:""), tag: 0),
+                                DropdownItem(NSLocalizedString("Title", comment:""), tag: 1),
+                                DropdownItem(NSLocalizedString("Artist", comment:""), tag: 2),
+                                DropdownItem(NSLocalizedString("Album", comment:""), tag: 3)
+                            ]
+                        }
+                    }
+
+                    if boolSelection || intSelection != 0 {
+                        HStack{
+                            Text(NSLocalizedString("Bluetooth Headset Option", comment:""))
+                                .foregroundColor(.primary)
+                                .bold()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            DropdownPicker(selection: $intSelection2) {
+                                return [
+                                    DropdownItem(NSLocalizedString("Title", comment:""), tag: 1),
+                                    DropdownItem(NSLocalizedString("Artist", comment:""), tag: 2),
+                                    DropdownItem(NSLocalizedString("Album", comment:""), tag: 3)
+                                ]
+                            }
+                        }
+                    }
+                }
+                .onAppear {
+                    boolSelection = widgetID.config["unsupported"] as? Bool ?? false
+                    if let lyricsType = widgetID.config["lyricsType"] as? Int {
+                        intSelection = lyricsType
+                    } else {
+                        intSelection = boolSelection ? 1 : 0
+                    }
+                    if let bluetoothType = widgetID.config["bluetoothType"] as? Int {
+                        intSelection2 = bluetoothType
+                    } else {
+                        intSelection2 = 0
+                    }
+                }
+            default:
+                Text(NSLocalizedString("No Configurable Aspects", comment:""))
             }
         }
         .padding(.horizontal, 15)
@@ -326,7 +408,7 @@ struct WidgetPreferencesView: View {
     }
     
     func getFormattedDate(_ format: String) -> String {
-        let locale = UserDefaults.standard.string(forKey: "dateLocale", forPath: USER_DEFAULTS_PATH) ?? "en_US"
+        let locale = UserDefaults.standard.string(forKey: "dateLocale", forPath: USER_DEFAULTS_PATH) ?? "en"
         dateFormatter.locale = Locale(identifier: locale)
         dateFormatter.dateFormat = format
         // dateFormatter.locale = Locale(identifier: NSLocalizedString("en_US", comment:""))
@@ -378,189 +460,24 @@ struct WidgetPreferencesView: View {
             widgetStruct.config["filled"] = boolSelection
         case .weather:
             // MARK: Weather Handling
-            if text == "" {
-                widgetStruct.config["location"] = nil
-            } else {
-                widgetStruct.config["location"] = text
-            }
+            widgetStruct.config["useFahrenheit"] = intSelection == 1 ? true : false
+            widgetStruct.config["useMetric"] = intSelection2 == 0 ? true : false
             if weatherFormat == "" {
                 widgetStruct.config["format"] = nil
             } else {
                 widgetStruct.config["format"] = weatherFormat
             }
-        // default:
-        //     return;
+        case .lyrics:
+            // MARK: Weather Handling
+            widgetStruct.config["unsupported"] = boolSelection
+            widgetStruct.config["lyricsType"] = (boolSelection && intSelection == 0) ? 1 : intSelection
+            widgetStruct.config["bluetoothType"] = intSelection2
+        default:
+            return;
         }
         
         widgetManager.updateWidgetConfig(widgetSet: widgetSet, id: widgetID, newID: widgetStruct)
         widgetID.config = widgetStruct.config
         modified = false
     }
-}
-
-struct WeatherLocationView: View {
-    @State var searchString = ""
-    @Binding var locationID: String
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-
-    @State var locations: [Location] = []
-    
-    var body: some View {
-        NavigationView{
-            VStack {
-                SearchBarUIView(text: $searchString, search: search, placeHolder: NSLocalizedString("Input Location Name", comment:""))
-                Spacer()
-                List(locations) {location in
-                    ListCell(item: location)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            locationID = location.id
-                            presentationMode.wrappedValue.dismiss()
-                        }
-                }
-                .listStyle(PlainListStyle())
-                .padding(.vertical, 0)
-                .navigationBarTitle(Text(NSLocalizedString("Get Location ID", comment:"")))
-                .resignKeyboardOnDragGesture()
-            }
-        }
-    }
-
-    func search() {
-        if !searchString.isEmpty {
-            let dateLocale = UserDefaults.standard.string(forKey: "dateLocale", forPath: USER_DEFAULTS_PATH) ?? "en_US"
-            let apiKey = UserDefaults.standard.string(forKey: "apiKey", forPath: USER_DEFAULTS_PATH) ?? ""
-            let data = WeatherUtils.fetchLocationID(forName:searchString, apiKey:apiKey, dateLocale:dateLocale)
-            let json = try! JSONSerialization.jsonObject(with: data!, options: []) as! Dictionary<String, Any>
-            if json["code"] as? String == "200" {
-                let array = json["location"] as! [Dictionary<String, Any>]
-                for item in array {
-                    let name = item["name"] as! String
-                    let id = item["id"] as! String
-                    let country = item["country"] as! String
-                    let adm1 = item["adm1"] as! String
-                    let adm2 = item["adm2"] as! String
-                    let lat = item["lat"] as! String
-                    let lon = item["lon"] as! String
-                    locations.append(Location(id: id, name: name, country: country, adm1: adm1, adm2: adm2, lat: lat, lon: lon))
-                }
-            }
-        }
-    }
-}
-
-struct SearchBarUIView: UIViewRepresentable {
-    @Binding var text: String
-    let placeHolder: String?
-    var search: () -> Void
-    init(text: Binding<String>, search: @escaping () -> Void, placeHolder: String? = nil) {
-        self._text = text
-        self.placeHolder = placeHolder
-        self.search = search
-    }
-    func makeCoordinator() -> Coordinator {
-        Coordinator(text: $text, searchAction: search)
-    }
-    
-    func makeUIView(context: Context) -> UISearchBar {
-        let searchBar = UISearchBar()
-        searchBar.searchBarStyle = .minimal
-        searchBar.delegate = context.coordinator
-        if let placeHolder = self.placeHolder {
-            searchBar.placeholder = placeHolder
-        }
-        return searchBar
-    }
-    func updateUIView(_ uiView: UISearchBar, context: Context) {
-        
-    }
-    class Coordinator: NSObject, UISearchBarDelegate {
-        @Binding var text: String
-        var search: () -> Void
-        public init(text: Binding<String>, searchAction: @escaping () -> Void) {
-            self._text = text
-            search = searchAction
-        }
-        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-            self.text = searchText
-        }
-        func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-            searchBar.showsCancelButton = false
-        }
-        func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-            searchBar.showsCancelButton = true
-        }
-        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-            searchBar.showsCancelButton = false
-            searchBar.searchTextField.endEditing(true)
-            self.text = ""
-            searchBar.searchTextField.text = ""
-        }
-        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-            search()
-            UIApplication.shared.endEditing(true)
-        }
-    }
-}
-
-struct ListCell: View {
-    var item: Location
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text("\(item.id),\(item.name)")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.primary)
-                Spacer()
-            }
-            HStack {
-                Text("\(item.adm1),\(item.adm2)")
-                    .lineLimit(1)
-                    .font(.system(size: 15))
-                    .foregroundColor(.secondary)
-                Spacer()
-            }
-        }
-    }
-}
-
-// Update for iOS 15
-// MARK: - UIApplication extension for resgning keyboard on pressing the cancel buttion of the search bar
-extension UIApplication {
-    /// Resigns the keyboard.
-    ///
-    /// Used for resigning the keyboard when pressing the cancel button in a searchbar based on [this](https://stackoverflow.com/a/58473985/3687284) solution.
-    /// - Parameter force: set true to resign the keyboard.
-    func endEditing(_ force: Bool) {
-        let scenes = UIApplication.shared.connectedScenes
-        let windowScene = scenes.first as? UIWindowScene
-        let window = windowScene?.windows.first
-        window?.endEditing(force)
-    }
-}
-
-struct ResignKeyboardOnDragGesture: ViewModifier {
-    var gesture = DragGesture().onChanged{_ in
-        UIApplication.shared.endEditing(true)
-    }
-    func body(content: Content) -> some View {
-        content.gesture(gesture)
-    }
-}
-
-extension View {
-    func resignKeyboardOnDragGesture() -> some View {
-        return modifier(ResignKeyboardOnDragGesture())
-    }
-}
-
-struct Location: Identifiable {
-    var id: String
-    var name: String
-    var country: String
-    var adm1: String
-    var adm2: String
-    var lat: String
-    var lon: String
 }
