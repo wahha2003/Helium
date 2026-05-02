@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import WidgetKit
 
 let buildNumber: Int = 0
 let DEBUG_MODE_ENABLED = false
@@ -24,6 +25,7 @@ struct SettingsView: View {
     @State var dateLocale: String = Locale.current.languageCode!
     @State var hideSaveConfirmation: Bool = false
     @State var debugBorder: Bool = false
+    @State var autoStartHUD: Bool = false
     
     var body: some View {
         NavigationView {
@@ -63,6 +65,20 @@ struct SettingsView: View {
                                 .bold()
                                 .minimumScaleFactor(0.5)
                         }
+                    }
+
+                    HStack {
+                        Toggle(isOn: $autoStartHUD) {
+                            Text(NSLocalizedString("Auto-Start HUD on Boot", comment:""))
+                                .bold()
+                                .minimumScaleFactor(0.5)
+                        }
+                    }
+
+                    if autoStartHUD {
+                        Text(NSLocalizedString("Add the Helium widget to your home screen for boot auto-start to work.", comment:""))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                     
                     HStack {
@@ -116,14 +132,23 @@ struct SettingsView: View {
         dateLocale = UserDefaults.standard.string(forKey: "dateLocale", forPath: USER_DEFAULTS_PATH) ?? Locale.current.languageCode!
         hideSaveConfirmation = UserDefaults.standard.bool(forKey: "hideSaveConfirmation", forPath: USER_DEFAULTS_PATH)
         debugBorder = UserDefaults.standard.bool(forKey: "debugBorder", forPath: USER_DEFAULTS_PATH)
+        autoStartHUD = UserDefaults.standard.bool(forKey: "autoStartHUD", forPath: USER_DEFAULTS_PATH)
     }
 
     func saveChanges() {
         UserDefaults.standard.setValue(dateLocale, forKey: "dateLocale", forPath: USER_DEFAULTS_PATH)
         UserDefaults.standard.setValue(hideSaveConfirmation, forKey: "hideSaveConfirmation", forPath: USER_DEFAULTS_PATH)
         UserDefaults.standard.setValue(debugBorder, forKey: "debugBorder", forPath: USER_DEFAULTS_PATH)
+        UserDefaults.standard.setValue(autoStartHUD, forKey: "autoStartHUD", forPath: USER_DEFAULTS_PATH)
         UIApplication.shared.alert(title: NSLocalizedString("Save Changes", comment:""), body: NSLocalizedString("Settings saved successfully", comment:""))
         DarwinNotificationCenter.default.post(name: NOTIFY_RELOAD_HUD)
+        reloadWidgetTimelines()
+    }
+
+    func reloadWidgetTimelines() {
+        if #available(iOS 14.0, *) {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
     
     // Link Cell code from Cowabunga

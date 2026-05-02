@@ -55,6 +55,13 @@ if [ -d $BUILD_LOCATION ]; then
     cp -r "$APP_BUILD_FILES/fonts" "$BUILD_LOCATION/"
     cp -r "$APP_BUILD_FILES/credits" "$BUILD_LOCATION/"
 
+    # Ensure widget extension is in PlugIns
+    if [ -d "$BUILD_LOCATION/PlugIns/HeliumWidget.appex" ]; then
+        echo "Widget extension found in build"
+    else
+        echo "Warning: Widget extension not found in build output"
+    fi
+
     # Create payload
     echo "Creating payload"
     cd build

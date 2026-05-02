@@ -27,6 +27,8 @@
 "Locale" = "Locale";
 "Hide Save Confirmation Popup" = "Hide Save Confirmation Popup";
 "Display Debug Border" = "Display Debug Border";
+"Auto-Start HUD on Boot" = "Auto-Start HUD on Boot";
+"Add the Helium widget to your home screen for boot auto-start to work." = "Add the Helium widget to your home screen for boot auto-start to work.";
 "Use Adaptive Colors" = "Use Adaptive Colors";
 "Helium Data" = "Helium Data";
 "Successfully deleted user data!" = "Successfully deleted user data!";

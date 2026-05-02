@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import WidgetKit
 
 // MARK: Home Page View
 struct HomePageView: View {
@@ -119,6 +120,9 @@ struct HomePageView: View {
         isNowEnabled = isActive
         buttonDisabled = false
         inProgress.toggle()
+        if #available(iOS 14.0, *) {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
       }, !isNowEnabled)
   }
 }

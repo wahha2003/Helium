@@ -28,6 +28,8 @@
 "Show when Rotating" = "旋转屏幕时显示";
 "Hide Save Confirmation Popup" = "不显示保存确认弹窗";
 "Display Debug Border" = "显示调试边框";
+"Auto-Start HUD on Boot" = "开机自动启动 HUD";
+"Add the Helium widget to your home screen for boot auto-start to work." = "请将 Helium 小组件添加到主屏幕，开机自启动才能生效。";
 "Use Adaptive Colors" = "使用自适应颜色";
 "Helium Data" = "氦气数据";
 "Successfully deleted user data!" = "已成功删除用户数据！";
