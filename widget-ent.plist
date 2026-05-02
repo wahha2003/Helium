@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>application-identifier</key>
-	<string>com.leemin.helium.widget</string>
+	<string>ch.wahha.helium.widget</string>
 	<key>com.apple.private.security.no-sandbox</key>
 	<true/>
 	<key>platform-application</key>

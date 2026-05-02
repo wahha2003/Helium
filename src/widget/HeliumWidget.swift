@@ -62,7 +62,12 @@ struct HeliumLaunchWidget: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: HUDStatusProvider()) { entry in
-            HeliumWidgetView(entry: entry)
+            if #available(iOS 17.0, *) {
+                HeliumWidgetView(entry: entry)
+                    .containerBackground(.fill.tertiary, for: .widget)
+            } else {
+                HeliumWidgetView(entry: entry)
+            }
         }
         .configurationDisplayName("Helium HUD")
         .description("Auto-start HUD service at boot")

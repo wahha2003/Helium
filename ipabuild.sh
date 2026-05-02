@@ -135,6 +135,23 @@ if [ -d $BUILD_LOCATION ]; then
     mkdir Payload
     cp -r $BUILD_LOCATION Payload/Helium.app
 
+    # Verify widget before archiving
+    echo ""
+    echo "=== Pre-Archive Widget Verification ==="
+    if [ -d "Payload/Helium.app/PlugIns/HeliumWidget.appex" ]; then
+        echo "OK: HeliumWidget.appex exists in Payload"
+        ls -la "Payload/Helium.app/PlugIns/HeliumWidget.appex/"
+        echo "Binary type:"
+        file "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget"
+        echo "Linked frameworks:"
+        otool -L "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null || true
+    else
+        echo "FAIL: HeliumWidget.appex NOT found in Payload"
+        echo "Contents of PlugIns/:"
+        ls -laR "Payload/Helium.app/PlugIns/" 2>/dev/null || echo "  (PlugIns directory does not exist)"
+    fi
+    echo ""
+
     # Archive
     echo "Archiving"
     if [[ $* != *--debug* ]]; then
@@ -144,14 +161,10 @@ if [ -d $BUILD_LOCATION ]; then
     rm -rf Helium.app
     rm -rf Payload
 
-    # Verify widget is included
+    # Final verification
     echo ""
-    echo "=== Build Verification ==="
-    if unzip -l Helium.tipa | grep -q "HeliumWidget.appex"; then
-        echo "OK: Widget extension is included in Helium.tipa"
-    else
-        echo "FAIL: Widget extension is NOT in Helium.tipa"
-    fi
+    echo "=== Final .tipa Verification ==="
+    unzip -l Helium.tipa | grep -i "widget\|PlugIns" || echo "  No widget-related files found"
 fi
 
 # Cleanup
