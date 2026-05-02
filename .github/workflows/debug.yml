@@ -69,7 +69,19 @@ jobs:
         with:
           path: Helium
           submodules: recursive
-  
+
+      - name: Patch SDK for Compatibility
+        run: |
+          SDK_PATH="$THEOS/sdks/iPhoneOS16.5.sdk"
+          if [ -d "$SDK_PATH" ]; then
+            echo "Patching iPhoneOS16.5.sdk..."
+            find "$SDK_PATH/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule" -name "*.swiftmodule" -delete 2>/dev/null || true
+            find "$SDK_PATH/System/Library/Frameworks/WidgetKit.framework/Modules/WidgetKit.swiftmodule" -name "*.swiftmodule" -delete 2>/dev/null || true
+            echo "Removed binary swiftmodules to force interface recompilation."
+          else
+            echo "SDK 16.5 not found, skipping patch."
+          fi
+
       - name: Setup build environment
         run: |
           echo "Available SDKs: $(find $THEOS/sdks -name "*.sdk" -maxdepth 1 -print)"

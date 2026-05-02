@@ -61,7 +61,9 @@ jobs:
           if [ -d "$SDK_PATH" ]; then
             echo "Patching iPhoneOS16.5.sdk..."
             # 删除 SwiftUI 的二进制模块缓存，解决 "SDK is not supported by the compiler"
-            find "$SDK_PATH/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule" -name "*.swiftmodule" -delete
+            find "$SDK_PATH/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule" -name "*.swiftmodule" -delete 2>/dev/null || true
+            # 删除 WidgetKit 的二进制模块缓存（Widget Extension 依赖）
+            find "$SDK_PATH/System/Library/Frameworks/WidgetKit.framework/Modules/WidgetKit.swiftmodule" -name "*.swiftmodule" -delete 2>/dev/null || true
             echo "Removed binary swiftmodules to force interface recompilation."
           else
             echo "SDK 16.5 not found, skipping patch."

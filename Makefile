@@ -69,6 +69,8 @@ HeliumWidget_FRAMEWORKS = WidgetKit SwiftUI
 HeliumWidget_CFLAGS = -fobjc-arc
 HeliumWidget_SWIFTFLAGS = -import-objc-header $(WIDGET_EXT_DIR)/HeliumWidget-Bridging-Header.h
 HeliumWidget_RESOURCE_DIRS = $(WIDGET_EXT_DIR)/Resources
+HeliumWidget_INSTALL_PATH = /Applications/Helium.app/PlugIns
+HeliumWidget_USE_MODULES := 0
 
 ifeq ($(TARGET_CODESIGN),ldid)
 HeliumWidget_CODESIGN_FLAGS = -Swidget-ent.plist

@@ -9,8 +9,10 @@ DEBUG_LOCATION="$WORKING_LOCATION/.theos/obj/debug"
 RELEASE_LOCATION="$WORKING_LOCATION/.theos/obj"
 if [[ $* == *--debug* ]]; then
     BUILD_LOCATION="$DEBUG_LOCATION/Helium.app"
+    WIDGET_BUILD_LOCATION="$DEBUG_LOCATION/HeliumWidget.appex"
 else
     BUILD_LOCATION="$RELEASE_LOCATION/Helium.app"
+    WIDGET_BUILD_LOCATION="$RELEASE_LOCATION/HeliumWidget.appex"
 fi
 
 if [[ $* == *--clean* ]]; then
@@ -56,10 +58,22 @@ if [ -d $BUILD_LOCATION ]; then
     cp -r "$APP_BUILD_FILES/credits" "$BUILD_LOCATION/"
 
     # Ensure widget extension is in PlugIns
+    mkdir -p "$BUILD_LOCATION/PlugIns"
     if [ -d "$BUILD_LOCATION/PlugIns/HeliumWidget.appex" ]; then
-        echo "Widget extension found in build"
+        echo "Widget extension already nested by Theos"
+    elif [ -d "$WIDGET_BUILD_LOCATION" ]; then
+        echo "Manually copying widget extension to PlugIns"
+        cp -r "$WIDGET_BUILD_LOCATION" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex"
     else
         echo "Warning: Widget extension not found in build output"
+        echo "  Checked: $BUILD_LOCATION/PlugIns/HeliumWidget.appex"
+        echo "  Checked: $WIDGET_BUILD_LOCATION"
+    fi
+
+    # Sign the widget extension with entitlements
+    if [ -d "$BUILD_LOCATION/PlugIns/HeliumWidget.appex" ]; then
+        echo "Signing widget extension"
+        ldid -S"$WORKING_LOCATION/widget-ent.plist" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null || true
     fi
 
     # Create payload
