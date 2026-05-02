@@ -79,6 +79,7 @@ for ARCH in arm64 arm64e; do
         -framework WidgetKit \
         -framework SwiftUI \
         -application-extension \
+        -Xlinker -application_extension \
         -Xlinker -rpath -Xlinker /usr/lib/swift \
         "$WIDGET_SRC/HeliumWidget.swift" \
         "$WIDGET_BUILD_DIR/WidgetSpawnHelper_$ARCH.o" \
@@ -145,6 +146,8 @@ if [ -d $BUILD_LOCATION ]; then
         file "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget"
         echo "Linked frameworks:"
         otool -L "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null || true
+        echo "Mach-O header (check MH_APP_EXTENSION_SAFE = 0x02000000 in flags):"
+        otool -h "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null || true
     else
         echo "FAIL: HeliumWidget.appex NOT found in Payload"
         echo "Contents of PlugIns/:"
