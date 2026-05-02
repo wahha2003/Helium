@@ -74,6 +74,7 @@ for ARCH in arm64 arm64e; do
     xcrun -sdk iphoneos swiftc \
         -target ${ARCH}-apple-ios14.0 \
         -sdk "$SDK_PATH" \
+        -parse-as-library \
         -import-objc-header "$WIDGET_SRC/HeliumWidget-Bridging-Header.h" \
         -framework WidgetKit \
         -framework SwiftUI \
