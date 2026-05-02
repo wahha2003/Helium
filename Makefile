@@ -28,7 +28,6 @@ WIDGETVIEWS_DIR := $(VIEWS_DIR)/widget
 WIDGETSETVIEWS_DIR := $(VIEWS_DIR)/widgetset
 
 WIDGETS_DIR := $(SRC_DIR)/widgets
-WIDGET_EXT_DIR := $(SRC_DIR)/widget
 
 $(APPLICATION_NAME)_USE_MODULES := 0
 # Add Files From Directories
@@ -53,7 +52,6 @@ $(APPLICATION_NAME)_SWIFTFLAGS += -import-objc-header src/bridging/Helium-Bridgi
 
 $(APPLICATION_NAME)_FRAMEWORKS += CoreGraphics QuartzCore UIKit Foundation CoreLocation AVFoundation WidgetKit
 $(APPLICATION_NAME)_PRIVATE_FRAMEWORKS += BackBoardServices GraphicsServices IOKit SpringBoardServices Weather WeatherFoundation WeatherUI MediaRemote
-$(APPLICATION_NAME)_APPEXES = HeliumWidget
 
 ifeq ($(TARGET_CODESIGN),ldid)
 $(APPLICATION_NAME)_CODESIGN_FLAGS += -Sent.plist
@@ -61,25 +59,7 @@ else
 $(APPLICATION_NAME)_CODESIGN_FLAGS += --entitlements ent.plist $(TARGET_CODESIGN_FLAGS)
 endif
 
-# Widget Extension
-APPEXTENSION_NAME = HeliumWidget
-
-HeliumWidget_FILES = $(WIDGET_EXT_DIR)/HeliumWidget.swift $(WIDGET_EXT_DIR)/WidgetSpawnHelper.m
-HeliumWidget_FRAMEWORKS = WidgetKit SwiftUI
-HeliumWidget_CFLAGS = -fobjc-arc
-HeliumWidget_SWIFTFLAGS = -import-objc-header $(WIDGET_EXT_DIR)/HeliumWidget-Bridging-Header.h
-HeliumWidget_RESOURCE_DIRS = $(WIDGET_EXT_DIR)/Resources
-HeliumWidget_INSTALL_PATH = /Applications/Helium.app/PlugIns
-HeliumWidget_USE_MODULES := 0
-
-ifeq ($(TARGET_CODESIGN),ldid)
-HeliumWidget_CODESIGN_FLAGS = -Swidget-ent.plist
-else
-HeliumWidget_CODESIGN_FLAGS = --entitlements widget-ent.plist $(TARGET_CODESIGN_FLAGS)
-endif
-
 include $(THEOS_MAKE_PATH)/application.mk
-include $(THEOS_MAKE_PATH)/appextension.mk
 
 after-stage::
 	$(ECHO_NOTHING)mkdir -p packages $(THEOS_STAGING_DIR)/Payload$(ECHO_END)

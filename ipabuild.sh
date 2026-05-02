@@ -9,15 +9,14 @@ DEBUG_LOCATION="$WORKING_LOCATION/.theos/obj/debug"
 RELEASE_LOCATION="$WORKING_LOCATION/.theos/obj"
 if [[ $* == *--debug* ]]; then
     BUILD_LOCATION="$DEBUG_LOCATION/Helium.app"
-    WIDGET_BUILD_LOCATION="$DEBUG_LOCATION/HeliumWidget.appex"
 else
     BUILD_LOCATION="$RELEASE_LOCATION/Helium.app"
-    WIDGET_BUILD_LOCATION="$RELEASE_LOCATION/HeliumWidget.appex"
 fi
 
 if [[ $* == *--clean* ]]; then
     echo "[*] Cleaning..."
     rm -rf build
+    rm -rf widget_build
     make clean
 fi
 
@@ -46,6 +45,64 @@ else
     fi
 fi
 
+# ============= Build Widget Extension Manually =============
+echo "[*] Building widget extension..."
+WIDGET_BUILD_DIR="$WORKING_LOCATION/widget_build"
+WIDGET_SRC="$WORKING_LOCATION/src/widget"
+rm -rf "$WIDGET_BUILD_DIR"
+mkdir -p "$WIDGET_BUILD_DIR"
+
+SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+echo "  Using SDK: $SDK_PATH"
+
+WIDGET_BUILD_OK=true
+
+set +e
+for ARCH in arm64 arm64e; do
+    echo "  Compiling widget for $ARCH..."
+
+    # Compile ObjC
+    xcrun -sdk iphoneos clang -arch $ARCH \
+        -miphoneos-version-min=14.0 \
+        -fobjc-arc \
+        -isysroot "$SDK_PATH" \
+        -c "$WIDGET_SRC/WidgetSpawnHelper.m" \
+        -o "$WIDGET_BUILD_DIR/WidgetSpawnHelper_$ARCH.o"
+    if [ $? -ne 0 ]; then WIDGET_BUILD_OK=false; break; fi
+
+    # Compile Swift and link
+    xcrun -sdk iphoneos swiftc \
+        -target ${ARCH}-apple-ios14.0 \
+        -sdk "$SDK_PATH" \
+        -import-objc-header "$WIDGET_SRC/HeliumWidget-Bridging-Header.h" \
+        -framework WidgetKit \
+        -framework SwiftUI \
+        -application-extension \
+        -Xlinker -rpath -Xlinker /usr/lib/swift \
+        "$WIDGET_SRC/HeliumWidget.swift" \
+        "$WIDGET_BUILD_DIR/WidgetSpawnHelper_$ARCH.o" \
+        -o "$WIDGET_BUILD_DIR/HeliumWidget_$ARCH"
+    if [ $? -ne 0 ]; then WIDGET_BUILD_OK=false; break; fi
+done
+set -e
+
+if [ "$WIDGET_BUILD_OK" = true ]; then
+    echo "  Creating fat binary..."
+    lipo -create \
+        "$WIDGET_BUILD_DIR/HeliumWidget_arm64" \
+        "$WIDGET_BUILD_DIR/HeliumWidget_arm64e" \
+        -output "$WIDGET_BUILD_DIR/HeliumWidget"
+
+    if [[ $* != *--debug* ]]; then
+        strip "$WIDGET_BUILD_DIR/HeliumWidget" 2>/dev/null || true
+    fi
+
+    echo "[*] Widget extension built successfully"
+else
+    echo "[!] Widget extension build FAILED"
+fi
+# ============= End Widget Build =============
+
 if [ -d $BUILD_LOCATION ]; then
     # Add the necessary files
     echo "Adding application files"
@@ -57,23 +114,18 @@ if [ -d $BUILD_LOCATION ]; then
     cp -r "$APP_BUILD_FILES/fonts" "$BUILD_LOCATION/"
     cp -r "$APP_BUILD_FILES/credits" "$BUILD_LOCATION/"
 
-    # Ensure widget extension is in PlugIns
-    mkdir -p "$BUILD_LOCATION/PlugIns"
-    if [ -d "$BUILD_LOCATION/PlugIns/HeliumWidget.appex" ]; then
-        echo "Widget extension already nested by Theos"
-    elif [ -d "$WIDGET_BUILD_LOCATION" ]; then
-        echo "Manually copying widget extension to PlugIns"
-        cp -r "$WIDGET_BUILD_LOCATION" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex"
-    else
-        echo "Warning: Widget extension not found in build output"
-        echo "  Checked: $BUILD_LOCATION/PlugIns/HeliumWidget.appex"
-        echo "  Checked: $WIDGET_BUILD_LOCATION"
-    fi
+    # Package widget extension
+    if [ "$WIDGET_BUILD_OK" = true ] && [ -f "$WIDGET_BUILD_DIR/HeliumWidget" ]; then
+        echo "Packaging widget extension"
+        mkdir -p "$BUILD_LOCATION/PlugIns/HeliumWidget.appex"
+        cp "$WIDGET_BUILD_DIR/HeliumWidget" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/"
+        cp "$WIDGET_SRC/Resources/Info.plist" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/"
 
-    # Sign the widget extension with entitlements
-    if [ -d "$BUILD_LOCATION/PlugIns/HeliumWidget.appex" ]; then
+        # Sign widget with entitlements
         echo "Signing widget extension"
-        ldid -S"$WORKING_LOCATION/widget-ent.plist" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null || true
+        ldid -S"$WORKING_LOCATION/widget-ent.plist" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/HeliumWidget"
+    else
+        echo "WARNING: Widget extension not available, skipping"
     fi
 
     # Create payload
@@ -90,4 +142,16 @@ if [ -d $BUILD_LOCATION ]; then
     zip -vr Helium.tipa Payload
     rm -rf Helium.app
     rm -rf Payload
+
+    # Verify widget is included
+    echo ""
+    echo "=== Build Verification ==="
+    if unzip -l Helium.tipa | grep -q "HeliumWidget.appex"; then
+        echo "OK: Widget extension is included in Helium.tipa"
+    else
+        echo "FAIL: Widget extension is NOT in Helium.tipa"
+    fi
 fi
+
+# Cleanup
+rm -rf "$WIDGET_BUILD_DIR"
