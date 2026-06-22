@@ -132,12 +132,13 @@ if [ -d $BUILD_LOCATION ]; then
         cp "$WIDGET_BUILD_DIR/HeliumWidget" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/"
         cp "$WIDGET_SRC/Resources/Info.plist" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/"
 
-        # Sign widget with entitlements
-        echo "Signing widget extension"
-        ldid -S"$WORKING_LOCATION/widget-ent.plist" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/HeliumWidget"
+        # Sign the entire .appex bundle (generates _CodeSignature/CodeResources)
+        echo "Signing widget extension bundle"
+        ldid -S"$WORKING_LOCATION/widget-ent.plist" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex"
 
-        # Verify MH_APP_EXTENSION_SAFE survived signing
-        echo "Post-sign flags check:"
+        # Verify
+        echo "Post-sign verification:"
+        ls -la "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/_CodeSignature/" 2>/dev/null || echo "  WARNING: _CodeSignature not created!"
         otool -h "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null | grep flags || true
     else
         echo "WARNING: Widget extension not available, skipping"
