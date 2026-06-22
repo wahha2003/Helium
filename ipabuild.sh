@@ -63,7 +63,7 @@ for ARCH in arm64 arm64e; do
 
     # Pure Swift widget - no ObjC dependency for this test
     xcrun -sdk iphoneos swiftc \
-        -target ${ARCH}-apple-ios14.0 \
+        -target ${ARCH}-apple-ios15.0 \
         -sdk "$SDK_PATH" \
         -parse-as-library \
         -framework WidgetKit \

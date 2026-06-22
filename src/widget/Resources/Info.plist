@@ -2,22 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleIdentifier</key>
-	<string>com.leemin.helium.widget</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>HeliumWidget</string>
 	<key>CFBundleDisplayName</key>
-	<string>Helium</string>
+	<string>HeliumWidget</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.leemin.helium.widget</string>
 	<key>CFBundleVersion</key>
-	<string>3.2.5</string>
+	<string>1</string>
 	<key>CFBundleShortVersionString</key>
-	<string>3.2.6</string>
+	<string>1.0</string>
 	<key>CFBundleExecutable</key>
 	<string>HeliumWidget</string>
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>iPhoneOS</string>
@@ -27,16 +29,30 @@
 		<integer>1</integer>
 		<integer>2</integer>
 	</array>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
 	<key>MinimumOSVersion</key>
-	<string>14.0</string>
+	<string>15.0</string>
 	<key>DTPlatformName</key>
 	<string>iphoneos</string>
-	<key>DTSDKName</key>
-	<string>iphoneos17.5</string>
 	<key>DTPlatformVersion</key>
 	<string>17.5</string>
+	<key>DTPlatformBuild</key>
+	<string>21F77</string>
+	<key>DTSDKName</key>
+	<string>iphoneos17.5</string>
+	<key>DTSDKBuild</key>
+	<string>21F77</string>
+	<key>DTXcode</key>
+	<string>1540</string>
+	<key>DTXcodeBuild</key>
+	<string>15F31d</string>
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
+	<key>BuildMachineOSBuild</key>
+	<string>23F79</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>
