@@ -65,6 +65,7 @@ for ARCH in arm64 arm64e; do
     xcrun -sdk iphoneos clang -arch $ARCH \
         -miphoneos-version-min=14.0 \
         -fobjc-arc \
+        -fapplication-extension \
         -isysroot "$SDK_PATH" \
         -c "$WIDGET_SRC/WidgetSpawnHelper.m" \
         -o "$WIDGET_BUILD_DIR/WidgetSpawnHelper_$ARCH.o"
@@ -89,6 +90,23 @@ done
 set -e
 
 if [ "$WIDGET_BUILD_OK" = true ]; then
+    # Patch MH_APP_EXTENSION_SAFE (0x02000000) into each arch binary
+    # The linker refuses to set it due to private API usage, but chronod requires it
+    for ARCH in arm64 arm64e; do
+        python3 -c "
+import struct, sys
+with open(sys.argv[1], 'r+b') as f:
+    magic = struct.unpack('<I', f.read(4))[0]
+    if magic == 0xfeedfacf:  # 64-bit
+        f.seek(24)
+        flags = struct.unpack('<I', f.read(4))[0]
+        flags |= 0x02000000
+        f.seek(24)
+        f.write(struct.pack('<I', flags))
+" "$WIDGET_BUILD_DIR/HeliumWidget_$ARCH"
+    done
+    echo "  Patched MH_APP_EXTENSION_SAFE flag"
+
     echo "  Creating fat binary..."
     lipo -create \
         "$WIDGET_BUILD_DIR/HeliumWidget_arm64" \

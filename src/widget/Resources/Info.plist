@@ -46,17 +46,10 @@
 	<dict>
 		<key>EXExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
+		<key>WidgetKitFamilies</key>
+		<array>
+			<string>systemSmall</string>
+		</array>
 	</dict>
-	<key>_WidgetKitFamilies</key>
-	<array>
-		<dict>
-			<key>_WidgetKitWidgetKind</key>
-			<string>HeliumHUD</string>
-			<key>_WidgetKitFamilies</key>
-			<array>
-				<string>small</string>
-			</array>
-		</dict>
-	</array>
 </dict>
 </plist>
