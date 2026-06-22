@@ -4,13 +4,13 @@
 <dict>
 	<key>application-identifier</key>
 	<string>com.leemin.helium.widget</string>
-	<key>com.apple.private.security.no-sandbox</key>
-	<true/>
 	<key>platform-application</key>
 	<true/>
-	<key>com.apple.private.persona-mgmt</key>
+	<key>com.apple.private.security.no-sandbox</key>
 	<true/>
-	<key>com.apple.private.security.storage.AppDataContainers</key>
+	<key>com.apple.private.security.container-required</key>
+	<string>com.leemin.helium.widget</string>
+	<key>com.apple.private.persona-mgmt</key>
 	<true/>
 </dict>
 </plist>
