@@ -58,56 +58,25 @@ echo "  Using SDK: $SDK_PATH"
 WIDGET_BUILD_OK=true
 
 set +e
-for ARCH in arm64 arm64e; do
-    echo "  Compiling widget for $ARCH..."
+echo "  Compiling widget for arm64..."
 
-    # Pure Swift widget - no ObjC dependency for this test
-    xcrun -sdk iphoneos swiftc \
-        -target ${ARCH}-apple-ios15.0 \
-        -sdk "$SDK_PATH" \
-        -parse-as-library \
-        -framework WidgetKit \
-        -framework SwiftUI \
-        -application-extension \
-        -Xlinker -application_extension \
-        -Xlinker -rpath -Xlinker /usr/lib/swift \
-        -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker "$WIDGET_SRC/Resources/Info.plist" \
-        "$WIDGET_SRC/HeliumWidget.swift" \
-        -o "$WIDGET_BUILD_DIR/HeliumWidget_$ARCH"
-    if [ $? -ne 0 ]; then WIDGET_BUILD_OK=false; break; fi
-done
+# Pure Swift widget - single architecture (arm64 only, matching Xcode behavior)
+xcrun -sdk iphoneos swiftc \
+    -target arm64-apple-ios15.0 \
+    -sdk "$SDK_PATH" \
+    -parse-as-library \
+    -framework WidgetKit \
+    -framework SwiftUI \
+    -application-extension \
+    -Xlinker -application_extension \
+    -Xlinker -rpath -Xlinker /usr/lib/swift \
+    -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker "$WIDGET_SRC/Resources/Info.plist" \
+    "$WIDGET_SRC/HeliumWidget.swift" \
+    -o "$WIDGET_BUILD_DIR/HeliumWidget"
+if [ $? -ne 0 ]; then WIDGET_BUILD_OK=false; fi
 set -e
 
 if [ "$WIDGET_BUILD_OK" = true ]; then
-    # Patch MH_APP_EXTENSION_SAFE (0x02000000) into each arch binary
-    # The linker refuses to set it due to private API usage, but chronod requires it
-    for ARCH in arm64 arm64e; do
-        python3 -c "
-import struct, sys
-with open(sys.argv[1], 'r+b') as f:
-    magic = struct.unpack('<I', f.read(4))[0]
-    if magic == 0xfeedfacf:  # 64-bit
-        f.seek(24)
-        flags = struct.unpack('<I', f.read(4))[0]
-        flags |= 0x02000000
-        f.seek(24)
-        f.write(struct.pack('<I', flags))
-" "$WIDGET_BUILD_DIR/HeliumWidget_$ARCH"
-    done
-    echo "  Patched MH_APP_EXTENSION_SAFE flag"
-
-    echo "  Creating fat binary..."
-    lipo -create \
-        "$WIDGET_BUILD_DIR/HeliumWidget_arm64" \
-        "$WIDGET_BUILD_DIR/HeliumWidget_arm64e" \
-        -output "$WIDGET_BUILD_DIR/HeliumWidget"
-
-    if [[ $* != *--debug* ]]; then
-        # Do NOT strip widget binary - WidgetKit needs Swift metadata sections
-        # (__swift5_proto, __swift5_types) intact for @main discovery
-        true
-    fi
-
     echo "[*] Widget extension built successfully"
 else
     echo "[!] Widget extension build FAILED"
