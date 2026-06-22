@@ -42,5 +42,21 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
+	<key>EXAppExtensionAttributes</key>
+	<dict>
+		<key>EXExtensionPointIdentifier</key>
+		<string>com.apple.widgetkit-extension</string>
+	</dict>
+	<key>_WidgetKitFamilies</key>
+	<array>
+		<dict>
+			<key>_WidgetKitWidgetKind</key>
+			<string>HeliumHUD</string>
+			<key>_WidgetKitFamilies</key>
+			<array>
+				<string>small</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
