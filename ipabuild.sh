@@ -61,22 +61,11 @@ set +e
 for ARCH in arm64 arm64e; do
     echo "  Compiling widget for $ARCH..."
 
-    # Compile ObjC
-    xcrun -sdk iphoneos clang -arch $ARCH \
-        -miphoneos-version-min=14.0 \
-        -fobjc-arc \
-        -fapplication-extension \
-        -isysroot "$SDK_PATH" \
-        -c "$WIDGET_SRC/WidgetSpawnHelper.m" \
-        -o "$WIDGET_BUILD_DIR/WidgetSpawnHelper_$ARCH.o"
-    if [ $? -ne 0 ]; then WIDGET_BUILD_OK=false; break; fi
-
-    # Compile Swift and link (embed Info.plist into __TEXT,__info_plist for chronod discovery)
+    # Pure Swift widget - no ObjC dependency for this test
     xcrun -sdk iphoneos swiftc \
         -target ${ARCH}-apple-ios14.0 \
         -sdk "$SDK_PATH" \
         -parse-as-library \
-        -import-objc-header "$WIDGET_SRC/HeliumWidget-Bridging-Header.h" \
         -framework WidgetKit \
         -framework SwiftUI \
         -application-extension \
@@ -84,7 +73,6 @@ for ARCH in arm64 arm64e; do
         -Xlinker -rpath -Xlinker /usr/lib/swift \
         -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker "$WIDGET_SRC/Resources/Info.plist" \
         "$WIDGET_SRC/HeliumWidget.swift" \
-        "$WIDGET_BUILD_DIR/WidgetSpawnHelper_$ARCH.o" \
         -o "$WIDGET_BUILD_DIR/HeliumWidget_$ARCH"
     if [ $? -ne 0 ]; then WIDGET_BUILD_OK=false; break; fi
 done

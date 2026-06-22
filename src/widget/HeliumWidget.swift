@@ -3,22 +3,20 @@ import SwiftUI
 
 struct HUDEntry: TimelineEntry {
     let date: Date
-    let launched: Bool
 }
 
 struct HUDTimelineProvider: TimelineProvider {
     func placeholder(in context: Context) -> HUDEntry {
-        HUDEntry(date: Date(), launched: false)
+        HUDEntry(date: Date())
     }
 
     func getSnapshot(in context: Context, completion: @escaping (HUDEntry) -> Void) {
-        completion(HUDEntry(date: Date(), launched: SpawnHUDIfNeeded()))
+        completion(HUDEntry(date: Date()))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<HUDEntry>) -> Void) {
-        let ok = SpawnHUDIfNeeded()
         let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-        completion(Timeline(entries: [HUDEntry(date: Date(), launched: ok)], policy: .after(next)))
+        completion(Timeline(entries: [HUDEntry(date: Date())], policy: .after(next)))
     }
 }
 
@@ -26,10 +24,14 @@ struct HUDWidgetView: View {
     let entry: HUDEntry
 
     var body: some View {
-        Image(systemName: entry.launched ? "checkmark.circle.fill" : "xmark.circle")
-            .foregroundColor(entry.launched ? .green : .red)
-            .font(.largeTitle)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack {
+            Image(systemName: "bolt.circle.fill")
+                .font(.largeTitle)
+                .foregroundColor(.green)
+            Text("Helium")
+                .font(.caption)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
