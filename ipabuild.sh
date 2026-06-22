@@ -71,7 +71,7 @@ for ARCH in arm64 arm64e; do
         -o "$WIDGET_BUILD_DIR/WidgetSpawnHelper_$ARCH.o"
     if [ $? -ne 0 ]; then WIDGET_BUILD_OK=false; break; fi
 
-    # Compile Swift and link
+    # Compile Swift and link (embed Info.plist into __TEXT,__info_plist for chronod discovery)
     xcrun -sdk iphoneos swiftc \
         -target ${ARCH}-apple-ios14.0 \
         -sdk "$SDK_PATH" \
@@ -82,6 +82,7 @@ for ARCH in arm64 arm64e; do
         -application-extension \
         -Xlinker -application_extension \
         -Xlinker -rpath -Xlinker /usr/lib/swift \
+        -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker "$WIDGET_SRC/Resources/Info.plist" \
         "$WIDGET_SRC/HeliumWidget.swift" \
         "$WIDGET_BUILD_DIR/WidgetSpawnHelper_$ARCH.o" \
         -o "$WIDGET_BUILD_DIR/HeliumWidget_$ARCH"
@@ -114,7 +115,9 @@ with open(sys.argv[1], 'r+b') as f:
         -output "$WIDGET_BUILD_DIR/HeliumWidget"
 
     if [[ $* != *--debug* ]]; then
-        strip "$WIDGET_BUILD_DIR/HeliumWidget" 2>/dev/null || true
+        # Do NOT strip widget binary - WidgetKit needs Swift metadata sections
+        # (__swift5_proto, __swift5_types) intact for @main discovery
+        true
     fi
 
     echo "[*] Widget extension built successfully"
@@ -144,6 +147,10 @@ if [ -d $BUILD_LOCATION ]; then
         # Sign widget with entitlements
         echo "Signing widget extension"
         ldid -S"$WORKING_LOCATION/widget-ent.plist" "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/HeliumWidget"
+
+        # Verify MH_APP_EXTENSION_SAFE survived signing
+        echo "Post-sign flags check:"
+        otool -h "$BUILD_LOCATION/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null | grep flags || true
     else
         echo "WARNING: Widget extension not available, skipping"
     fi
@@ -166,6 +173,12 @@ if [ -d $BUILD_LOCATION ]; then
         otool -L "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null || true
         echo "Mach-O header (check MH_APP_EXTENSION_SAFE = 0x02000000 in flags):"
         otool -h "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null || true
+        echo "Embedded __info_plist section:"
+        xcrun size -m "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null | grep -i info_plist || echo "  WARNING: __info_plist NOT embedded!"
+        echo "Swift metadata sections:"
+        xcrun size -m "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null | grep -i swift5 || echo "  WARNING: Swift metadata sections missing!"
+        echo "Embedded plist content:"
+        xcrun otool -s __TEXT __info_plist "Payload/Helium.app/PlugIns/HeliumWidget.appex/HeliumWidget" 2>/dev/null | xxd -r 2>/dev/null | plutil -p - 2>/dev/null || echo "  (could not extract embedded plist)"
     else
         echo "FAIL: HeliumWidget.appex NOT found in Payload"
         echo "Contents of PlugIns/:"

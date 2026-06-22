@@ -32,9 +32,9 @@
 	<key>DTPlatformName</key>
 	<string>iphoneos</string>
 	<key>DTSDKName</key>
-	<string>iphoneos16.5</string>
+	<string>iphoneos17.5</string>
 	<key>DTPlatformVersion</key>
-	<string>16.5</string>
+	<string>17.5</string>
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>NSExtension</key>
@@ -46,10 +46,6 @@
 	<dict>
 		<key>EXExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
-		<key>WidgetKitFamilies</key>
-		<array>
-			<string>systemSmall</string>
-		</array>
 	</dict>
 </dict>
 </plist>
